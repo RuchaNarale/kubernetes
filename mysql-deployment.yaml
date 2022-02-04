@@ -1,30 +1,35 @@
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx
-  annotations:
-    configmap.reloader.stakater.com/reload: "my-sql"
+  name: mysql-deployment
   labels:
-    app: mysql   
+    app: mysql
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: mysql
-  replicas: 1 
-  template: 
+  template:
     metadata:
       labels:
-        app: mysql    
+        app: mysql
     spec:
       containers:
         - name: mysql
-          image: mysql
+          image: mysql:5.7
           ports:
-          - containerPort: 80        
+            - containerPort: 3306
           volumeMounts:
-            - name: mysql-config
-              mountPath: /var/lib/mysql
+            - mountPath: "/var/lib/mysql"
+              subPath: "mysql"
+              name: mysql-data
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secrets
+                  key: ROOT_PASSWORD
       volumes:
-        - name: mysql-config
-          configMap:
-            name: my-sql
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-data-disk
