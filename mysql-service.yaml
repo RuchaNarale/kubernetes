@@ -1,12 +1,11 @@
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
-  name: my-sqlservice
+  name: mysql-service
 spec:
   selector:
     app: mysql
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 80
-  type: LoadBalancer
+    port: 3306
+    targetPort: 3306
